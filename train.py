@@ -30,7 +30,7 @@ conv_params = [
     {'kernel_size': (1, 10), 'num_filters': 100, 'padding': (0, 5)},
     {'kernel_size': (1, 10), 'num_filters': 200, 'padding': (0, 5)}
 ]
-pool_params = {'kernel_size': (1, 3), 'padding': (0, 1)}
+pool_params = {'pool_fn': nn.AvgPool2d, 'kernel_size': (1, 3), 'padding': (0, 1)}
 input_size = (22, 1, 250)
 num_classes = 4
 

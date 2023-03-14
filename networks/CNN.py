@@ -16,7 +16,7 @@ class BasicCNN(nn.Module):
             input_size -- dimensions of single input instance
             num_classes -- default 4 (won't change)
             conv_params -- a list of dictionaries with 'kernel_size', 'num_filters', 'padding' (optional), 'stride' (optional)
-            pool_params -- a dictionary or list of dictionaries with 'kernel_size', 'padding' (optional), 'stride' (optional)
+            pool_params -- a dictionary or list of dictionaries with 'pool_fn' (default nn.MaxPool2d), 'kernel_size', 'padding' (optional), 'stride' (optional)
             activation -- activation function used in conv layers, default is nn.ELU (exponential linear unit) 
         '''
 
@@ -40,12 +40,12 @@ class BasicCNN(nn.Module):
         for i in range(self.n_blocks):
             kernel_size, num_filters = conv_params[i]['kernel_size'], conv_params[i]['num_filters']
             conv_stride, conv_padding = conv_params[i].get('stride', (1, 1)), conv_params[i].get('padding', (0, 0))
-            pool_size = pool_params[i]['kernel_size']
+            pool_size, pool_fn = pool_params[i]['kernel_size'], pool_params[i].get('pool_type', nn.MaxPool2d)
             pool_stride, pool_padding = pool_params[i].get('stride', pool_size), pool_params[i].get('padding', (0, 0))
             conv_blocks[i] = nn.Sequential(
                 nn.Conv2d(channels, num_filters, kernel_size, conv_stride, conv_padding),
                 activation(),
-                nn.MaxPool2d(pool_size, pool_stride, pool_padding),
+                pool_fn(pool_size, pool_stride, pool_padding),
                 nn.BatchNorm2d(num_filters),
                 nn.Dropout2d(p=0.5)
             )
