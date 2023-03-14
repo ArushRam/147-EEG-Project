@@ -35,15 +35,16 @@ input_size = (22, 1, 250)
 num_classes = 4
 
 # Initialize Model
-BasicCNNModel = BasicCNN(input_size, num_classes, conv_params, pool_params).double()
+model = BasicCNN(input_size, num_classes, conv_params, pool_params).double()
+print(model)
 
 # Define the loss function and optimizer
 loss_fn = nn.CrossEntropyLoss()
-optimizer = optim.Adam(BasicCNNModel.parameters(), lr=0.001)
+optimizer = optim.Adam(model.parameters(), lr=0.001)
 
 for epoch in range(num_epochs):
     # Set the model to training mode
-    BasicCNNModel.train()
+    model.train()
 
     # Loop over the batches in the dataset
     for batch_idx, (data, target) in enumerate(train_loader):
@@ -51,7 +52,7 @@ for epoch in range(num_epochs):
         optimizer.zero_grad()
 
         # Forward pass
-        output = BasicCNNModel(data)
+        output = model(data)
 
         # Compute the loss
         loss = loss_fn(output, target.float())
@@ -69,13 +70,13 @@ for epoch in range(num_epochs):
                 100. * batch_idx / len(train_loader), loss.item()))
 
     # Evaluate the model on the validation set
-    BasicCNNModel.eval()
+    model.eval()
     val_loss = 0
     correct = 0
 
     with torch.no_grad():
         for data, target in val_loader:
-            output = BasicCNNModel(data)
+            output = model(data)
             val_loss += loss_fn(output, target.float()).item()
             pred = output.argmax(dim=1, keepdim=True)
             target = target.argmax(dim=1, keepdim=True)
