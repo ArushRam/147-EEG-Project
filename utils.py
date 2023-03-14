@@ -1,4 +1,24 @@
 import numpy as np
+import torch.nn as nn
+import torch.fft as fft
+import torch
+
+
+class Bandpass(nn.Module):
+    def __init__(self, lower, upper, device=None, num_bins=1000, sample_hz=250) -> None:
+        super().__init__()
+        self.num_bins = num_bins
+        self.sample_hz = sample_hz
+        freq = fft.fftfreq(self.num_bins, 1/self.sample_hz)
+        self.mask = (freq >= lower) * (freq <= upper)
+        if device is not None:
+            self.mask = self.mask.to(device)
+        
+    def forward(self, x):
+        f_x = fft.fft(x, dim=-1)
+        f_x = self.mask * f_x
+        return torch.real(fft.ifft(f_x))
+
 
 def data_prep(X,y,sub_sample,average,noise):
     

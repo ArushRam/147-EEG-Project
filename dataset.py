@@ -1,5 +1,5 @@
 import torch
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, TensorDataset
 from torchvision import datasets
 from torchvision.transforms import ToTensor
 import matplotlib.pyplot as plt
@@ -7,11 +7,11 @@ import numpy as np
 from utils import data_prep, to_categorical
 
 
-class EEGDataset(Dataset):
+class EEGDataset(TensorDataset):
     def __init__(self, x, y) -> None:
         super().__init__()
-        self.x = x
-        self.y = y
+        self.x = torch.from_numpy(x).float()
+        self.y = torch.from_numpy(y).float()
 
     def __len__(self):
         return self.x.shape[0]
@@ -23,9 +23,10 @@ class EEGDataset(Dataset):
 
 
 class EEGDataPreprocessor:
-    def __init__(self, valid_ratio=0.2) -> None:
+    def __init__(self, valid_ratio=0.2, preprocess=True) -> None:
         self.valid_ratio = valid_ratio
         self.data = self.load()
+        self.do_preprocess = preprocess
         (self.x_train,
          self.y_train,
          self.x_valid,
@@ -70,21 +71,24 @@ class EEGDataPreprocessor:
         ind_train = np.array(list(set(range(2115)).difference(set(ind_valid))))
 
         # Creating the training and validation sets using the generated indices
-        (X_train, X_valid) = X_train_valid[ind_train], X_train_valid[ind_valid]
+        (x_train, x_valid) = X_train_valid[ind_train], X_train_valid[ind_valid]
         (y_train, y_valid) = y_train_valid[ind_train], y_train_valid[ind_valid]
 
+        if self.do_preprocess:
         # Preprocessing the dataset
-        x_train, y_train = data_prep(X_train, y_train, 2, 2, True)
-        x_valid, y_valid = data_prep(X_valid, y_valid, 2, 2, True)
-        X_test_prep, y_test_prep = data_prep(X_test, y_test, 2, 2, True)
+            x_train, y_train = data_prep(x_train, y_train, 2, 2, True)
+            x_valid, y_valid = data_prep(x_valid, y_valid, 2, 2, True)
+            X_test_prep, y_test_prep = data_prep(X_test, y_test, 2, 2, True)
 
-        print('Shape of testing set:', X_test_prep.shape)
-        print('Shape of testing labels:', y_test_prep.shape)
+            print('Shape of testing set:', X_test_prep.shape)
+            print('Shape of testing labels:', y_test_prep.shape)
 
-        print('Shape of training set:', x_train.shape)
-        print('Shape of validation set:', x_valid.shape)
-        print('Shape of training labels:', y_train.shape)
-        print('Shape of validation labels:', y_valid.shape)
+            print('Shape of training set:', x_train.shape)
+            print('Shape of validation set:', x_valid.shape)
+            print('Shape of training labels:', y_train.shape)
+            print('Shape of validation labels:', y_valid.shape)
+        else:
+           X_test_prep, y_test_prep = X_test, y_test 
 
         # Converting the labels to categorical variables for multiclass classification
         y_train = to_categorical(y_train, 4)
