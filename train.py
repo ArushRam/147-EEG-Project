@@ -1,4 +1,4 @@
-from CNN import BasicCNN
+from networks.CNN import BasicCNN
 from dataset import EEGDataPreprocessor, EEGDataset
 import torch
 import torch.nn as nn
@@ -8,15 +8,15 @@ from utils import to_categorical
 from torch.nn.functional import one_hot
 import datetime
 
+# HYPERPARAMETERS
+num_epochs = 50
+batch_size = 64
+learning_rate = 0.001
+
 processed_data = EEGDataPreprocessor()
-
-
 train_dataset = EEGDataset(processed_data.x_train, processed_data.y_train)
 val_dataset = EEGDataset(processed_data.x_valid, processed_data.y_valid)
 test_dataset = EEGDataset(processed_data.x_test, processed_data.y_test)
-
-# Define batch size for training and testing
-batch_size = 64
 
 # Create dataloaders for training, validation, and testing data
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
@@ -26,18 +26,29 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size)
 datetime_str = datetime.datetime.now().strftime("%Y%m%d-%H%M")
 model_save_dir = 'logs/' + datetime_str + '/model'
 
-BasicCNNModel = BasicCNN()
+### MODEL INITIALIZATION ###
+# Define Architecture
+conv_params = [
+    {'kernel_size': (1, 10), 'num_filters': 25, 'padding': (0, 5)},
+    {'kernel_size': (1, 10), 'num_filters': 50, 'padding': (0, 5)},
+    {'kernel_size': (1, 10), 'num_filters': 100, 'padding': (0, 5)},
+    {'kernel_size': (1, 10), 'num_filters': 200, 'padding': (0, 5)}
+]
+pool_params = {'pool_fn': nn.AvgPool2d, 'kernel_size': (1, 3), 'padding': (0, 1)}
+input_size = (22, 1, 250)
+num_classes = 4
+
+# Initialize Model
+model = BasicCNN(input_size, num_classes, conv_params, pool_params)
+print(model)
 
 # Define the loss function and optimizer
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(BasicCNNModel.parameters(), lr=0.0001)
-
-# Train the model
-num_epochs = 50
+loss_fn = nn.CrossEntropyLoss()
+optimizer = optim.Adam(model.parameters(), lr=0.0001)
 
 for epoch in range(num_epochs):
     # Set the model to training mode
-    BasicCNNModel.train()
+    model.train()
 
     # Loop over the batches in the dataset
     for batch_idx, (data, target) in enumerate(train_loader):
@@ -45,10 +56,10 @@ for epoch in range(num_epochs):
         optimizer.zero_grad()
 
         # Forward pass
-        output = BasicCNNModel(data)
+        output = model(data)
 
         # Compute the loss
-        loss = criterion(output, target.float())
+        loss = loss_fn(output, target.float())
 
         # Backward pass
         loss.backward()
@@ -63,14 +74,14 @@ for epoch in range(num_epochs):
                 100. * batch_idx / len(train_loader), loss.item()))
 
     # Evaluate the model on the validation set
-    BasicCNNModel.eval()
+    model.eval()
     val_loss = 0
     correct = 0
 
     with torch.no_grad():
         for data, target in val_loader:
-            output = BasicCNNModel(data)
-            val_loss += criterion(output, target.float()).item()
+            output = model(data)
+            val_loss += loss_fn(output, target.float()).item()
             pred = output.argmax(dim=1, keepdim=True)
             target = target.argmax(dim=1, keepdim=True)
             correct += pred.eq(target.view_as(pred)).sum().item()
@@ -80,9 +91,9 @@ for epoch in range(num_epochs):
     print('Validation set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         val_loss, correct, len(val_loader.dataset), accuracy))
     
-    BasicCNNModel.save(epoch, optimizer, model_save_dir)
+    model.save(epoch, optimizer, model_save_dir)
 
-BasicCNNModel.eval()
+model.eval()
 
 # Initialize variables to keep track of accuracy and loss
 test_loss = 0.0
@@ -92,8 +103,8 @@ correct = 0
 
 with torch.no_grad():
     for data, target in test_loader:
-        output = BasicCNNModel(data)
-        test_loss += criterion(output, target.float()).item()
+        output = model(data)
+        test_loss += loss_fn(output, target.float()).item()
         pred = output.argmax(dim=1, keepdim=True)
         target = target.argmax(dim=1, keepdim=True)
         correct += pred.eq(target.view_as(pred)).sum().item()
