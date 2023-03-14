@@ -75,3 +75,24 @@ for epoch in range(num_epochs):
     accuracy = 100. * correct / len(val_loader.dataset)
     print('Validation set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         val_loss, correct, len(val_loader.dataset), accuracy))
+
+BasicCNNModel.eval()
+
+# Initialize variables to keep track of accuracy and loss
+test_loss = 0.0
+correct = 0
+
+# Iterate over batches of test data
+
+with torch.no_grad():
+    for data, target in test_loader:
+        output = BasicCNNModel(data)
+        test_loss += criterion(output, target.float()).item()
+        pred = output.argmax(dim=1, keepdim=True)
+        target = target.argmax(dim=1, keepdim=True)
+        correct += pred.eq(target.view_as(pred)).sum().item()
+
+test_loss /= len(test_loader.dataset)
+accuracy = 100. * correct / len(test_loader.dataset)
+print('Test set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+    test_loss, correct, len(test_loader.dataset), accuracy))
