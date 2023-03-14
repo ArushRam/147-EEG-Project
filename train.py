@@ -6,6 +6,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from utils import to_categorical
 from torch.nn.functional import one_hot
+import datetime
 
 processed_data = EEGDataPreprocessor()
 
@@ -21,6 +22,9 @@ batch_size = 64
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size)
 test_loader = DataLoader(test_dataset, batch_size=batch_size)
+
+datetime_str = datetime.datetime.now().strftime("%Y%m%d-%H%M")
+model_save_dir = 'logs/' + datetime_str + '/model'
 
 BasicCNNModel = BasicCNN()
 
@@ -75,6 +79,8 @@ for epoch in range(num_epochs):
     accuracy = 100. * correct / len(val_loader.dataset)
     print('Validation set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         val_loss, correct, len(val_loader.dataset), accuracy))
+    
+    BasicCNNModel.save(epoch, optimizer, model_save_dir)
 
 BasicCNNModel.eval()
 

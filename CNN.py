@@ -1,4 +1,6 @@
 import torch.nn as nn
+import torch
+import os
 
 
 class BasicCNN(nn.Module):
@@ -59,3 +61,12 @@ class BasicCNN(nn.Module):
         x = self.fc(x)
         # print("FC output shape:", x.shape)
         return x
+    
+    def save(self, epoch, optimizer, path):
+        os.makedirs(path, exist_ok=True) 
+        data = {
+            "epoch": epoch,
+            "opt_state_dict": optimizer.state_dict(),
+            "model_state_dict": self.state_dict()
+        }
+        torch.save(data, path + '/epoch=%03d.pth' % epoch)

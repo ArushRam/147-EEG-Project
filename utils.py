@@ -5,13 +5,14 @@ import torch
 
 
 class Bandpass(nn.Module):
-    def __init__(self, lower, upper, device, num_bins=1000, sample_hz=250) -> None:
+    def __init__(self, lower, upper, device=None, num_bins=1000, sample_hz=250) -> None:
         super().__init__()
         self.num_bins = num_bins
         self.sample_hz = sample_hz
         freq = fft.fftfreq(self.num_bins, 1/self.sample_hz)
         self.mask = (freq >= lower) * (freq <= upper)
-        self.mask = self.mask.to(device)
+        if device is not None:
+            self.mask = self.mask.to(device)
         
     def forward(self, x):
         f_x = fft.fft(x, dim=-1)
