@@ -1,4 +1,4 @@
-from Fourier_CNN import FourierCNN
+from networks.Fourier_CNN import FourierCNN
 from dataset import EEGDataPreprocessor, EEGDataset
 import torch
 import torch.nn as nn
