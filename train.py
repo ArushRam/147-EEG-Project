@@ -22,11 +22,11 @@ train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size)
 test_loader = DataLoader(test_dataset, batch_size=batch_size)
 
-BasicCNNModel = BasicCNN().double()
+BasicCNNModel = BasicCNN()
 
 # Define the loss function and optimizer
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(BasicCNNModel.parameters(), lr=0.001)
+optimizer = optim.Adam(BasicCNNModel.parameters(), lr=0.0001)
 
 # Train the model
 num_epochs = 50
