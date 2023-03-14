@@ -1,4 +1,4 @@
-from CNN import BasicCNN
+from networks.CNN import BasicCNN
 from dataset import EEGDataPreprocessor, EEGDataset
 import torch
 import torch.nn as nn
@@ -7,29 +7,39 @@ from torch.utils.data import DataLoader
 from utils import to_categorical
 from torch.nn.functional import one_hot
 
+# HYPERPARAMETERS
+num_epochs = 50
+batch_size = 64
+learning_rate = 0.001
+
 processed_data = EEGDataPreprocessor()
-
-
 train_dataset = EEGDataset(processed_data.x_train, processed_data.y_train)
 val_dataset = EEGDataset(processed_data.x_valid, processed_data.y_valid)
 test_dataset = EEGDataset(processed_data.x_test, processed_data.y_test)
-
-# Define batch size for training and testing
-batch_size = 64
 
 # Create dataloaders for training, validation, and testing data
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size)
 test_loader = DataLoader(test_dataset, batch_size=batch_size)
 
-BasicCNNModel = BasicCNN().double()
+### MODEL INITIALIZATION ###
+# Define Architecture
+conv_params = [
+    {'kernel_size': (1, 10), 'num_filters': 25, 'padding': (0, 5)},
+    {'kernel_size': (1, 10), 'num_filters': 50, 'padding': (0, 5)},
+    {'kernel_size': (1, 10), 'num_filters': 100, 'padding': (0, 5)},
+    {'kernel_size': (1, 10), 'num_filters': 200, 'padding': (0, 5)}
+]
+pool_params = {'kernel_size': (1, 3), 'padding': (0, 1)}
+input_size = (22, 1, 250)
+num_classes = 4
+
+# Initialize Model
+BasicCNNModel = BasicCNN(input_size, num_classes, conv_params, pool_params).double()
 
 # Define the loss function and optimizer
-criterion = nn.CrossEntropyLoss()
+loss_fn = nn.CrossEntropyLoss()
 optimizer = optim.Adam(BasicCNNModel.parameters(), lr=0.001)
-
-# Train the model
-num_epochs = 50
 
 for epoch in range(num_epochs):
     # Set the model to training mode
@@ -44,7 +54,7 @@ for epoch in range(num_epochs):
         output = BasicCNNModel(data)
 
         # Compute the loss
-        loss = criterion(output, target.float())
+        loss = loss_fn(output, target.float())
 
         # Backward pass
         loss.backward()
@@ -66,7 +76,7 @@ for epoch in range(num_epochs):
     with torch.no_grad():
         for data, target in val_loader:
             output = BasicCNNModel(data)
-            val_loss += criterion(output, target.float()).item()
+            val_loss += loss_fn(output, target.float()).item()
             pred = output.argmax(dim=1, keepdim=True)
             target = target.argmax(dim=1, keepdim=True)
             correct += pred.eq(target.view_as(pred)).sum().item()
