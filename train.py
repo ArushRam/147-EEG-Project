@@ -66,7 +66,6 @@ for epoch in range(num_epochs):
     with torch.no_grad():
         for data, target in val_loader:
             output = BasicCNNModel(data)
-            print(output)
             val_loss += criterion(output, target.float()).item()
             pred = output.argmax(dim=1, keepdim=True)
             target = target.argmax(dim=1, keepdim=True)
