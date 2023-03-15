@@ -2,7 +2,6 @@ import torch.nn as nn
 import torch
 import os
 
-
 class BasicCNN(nn.Module):
     def __init__(self, 
         input_size=(22, 1, 250),
