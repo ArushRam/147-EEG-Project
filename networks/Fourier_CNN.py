@@ -1,6 +1,7 @@
 import torch.nn as nn
 from utils import Bandpass
 import torch
+import os
 
 class FourierCNN(nn.Module):
     def __init__(self, num_bins, sample_freq, device, num_classes=4):
@@ -37,3 +38,12 @@ class FourierCNN(nn.Module):
         x = self.fc(x)
         # print("FC output shape:", x.shape)
         return x
+    
+    def save(self, epoch, optimizer, path):
+         os.makedirs(path, exist_ok=True) 
+         data = {
+             "epoch": epoch,
+             "opt_state_dict": optimizer.state_dict(),
+             "model_state_dict": self.state_dict()
+         }
+         torch.save(data, path + '/epoch=%03d.pth' % epoch)
