@@ -1,5 +1,5 @@
 import torch.nn as nn
-from utils import Bandpass
+from util.functions import Bandpass
 import torch
 import os
 
@@ -47,3 +47,9 @@ class FourierCNN(nn.Module):
              "model_state_dict": self.state_dict()
          }
          torch.save(data, path + '/epoch=%03d.pth' % epoch)
+         
+    def load(self, model_path, epoch, optimizer):
+        checkpoint = torch.load(model_path + '/epoch=%03d.pth' % epoch)
+        self.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['opt_state_dict'])
+        return optimizer, epoch
