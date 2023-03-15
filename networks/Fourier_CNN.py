@@ -1,5 +1,5 @@
 import torch.nn as nn
-from utils import Bandpass
+from util.functions import Bandpass
 import torch
 import os
 
