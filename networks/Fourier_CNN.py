@@ -16,10 +16,10 @@ class FourierCNN(nn.Module):
                         kernel_size=(2, 3), padding=(0, 2)).to(device),
                 # N x 25 x 1 x 19
                 nn.ELU(),
-                nn.AvgPool2d(kernel_size=(1, 2), padding=(0, 1)),
+                nn.MaxPool2d(kernel_size=(1, 2), padding=(0, 1)),
                 # N x 25 x 1 x 10
                 nn.BatchNorm2d(25).to(device),
-                # nn.Dropout2d(p=0.5)
+                nn.Dropout2d(p=0.5)
             )
             for i in range(0, 9)
         ])
@@ -27,19 +27,21 @@ class FourierCNN(nn.Module):
         self.spatial_filter = nn.Sequential(
             # Stack temporal convolutions
             # N x 250 x 1 x 10
-            nn.Conv2d(in_channels=250, out_channels=50,
+            nn.Conv2d(in_channels=225, out_channels=50,
                         kernel_size=(1, 3), padding=(0, 1)).to(device),
             # N x 50 x 1 x 10
             nn.ELU(),
-            nn.AvgPool2d(kernel_size=(1, 2), padding=(0, 0)),
+            nn.MaxPool2d(kernel_size=(1, 2), padding=(0, 0)),
             # N x 50 x 1 x 5
             nn.BatchNorm2d(50).to(device),
-            # nn.Dropout2d(p=0.5)
+            nn.Dropout2d(p=0.5)
         )
 
         self.fc = nn.Sequential(
             nn.Flatten(),
             nn.Linear(in_features=5 * 50, out_features=100),
+            # nn.BatchNorm1d(100),
+            # nn.ELU(),
             nn.Linear(in_features=100, out_features=4),
             nn.Softmax(dim=1)
         )
