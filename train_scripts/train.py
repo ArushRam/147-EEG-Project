@@ -14,8 +14,9 @@ from utils import to_categorical
 num_epochs = 50
 batch_size = 64
 learning_rate = 0.001
+trim_size = 500
 
-processed_data = EEGDataPreprocessor()
+processed_data = EEGDataPreprocessor(hyperparams={'trim_size': trim_size})
 train_dataset = EEGDataset(processed_data.x_train, processed_data.y_train)
 val_dataset = EEGDataset(processed_data.x_valid, processed_data.y_valid)
 test_dataset = EEGDataset(processed_data.x_test, processed_data.y_test)

@@ -20,13 +20,13 @@ class Bandpass(nn.Module):
         return torch.real(fft.ifft(f_x))
 
 
-def data_prep(X,y,sub_sample,average,noise):
+def data_prep(X,y,trim_size,sub_sample,average,noise):
     
     total_X = None
     total_y = None
     
     # Trimming the data (sample,22,1000) -> (sample,22,500)
-    X = X[:,:,0:500]
+    X = X[:,:,0:trim_size]
     print('Shape of X after trimming:',X.shape)
     
     # Maxpooling the data (sample,22,1000) -> (sample,22,500/sub_sample)

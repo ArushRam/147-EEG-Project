@@ -10,7 +10,9 @@ from networks.Fourier_CNN import FourierCNN
 from dataset import EEGDataPreprocessor, EEGDataset
 from utils import to_categorical
 
-processed_data = EEGDataPreprocessor()
+# Hyperparameters
+trim_size = 500
+processed_data = EEGDataPreprocessor(hyperparams={'trim_size': trim_size})
 
 
 train_dataset = EEGDataset(processed_data.x_train, processed_data.y_train)
