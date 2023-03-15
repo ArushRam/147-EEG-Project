@@ -8,7 +8,7 @@ import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from networks.Fourier_CNN import FourierCNN
 from dataset import EEGDataPreprocessor, EEGDataset
-from utils import to_categorical
+from util.functions import to_categorical
 
 # Hyperparameters
 trim_size = 500

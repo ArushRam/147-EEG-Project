@@ -1,10 +1,7 @@
 import torch
-from torch.utils.data import Dataset, TensorDataset
-from torchvision import datasets
-from torchvision.transforms import ToTensor
-import matplotlib.pyplot as plt
+from torch.utils.data import TensorDataset
 import numpy as np
-from utils import data_prep, to_categorical
+from util.functions import data_prep, to_categorical
 
 
 class EEGDataset(TensorDataset):

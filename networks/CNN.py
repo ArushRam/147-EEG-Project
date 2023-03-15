@@ -2,7 +2,6 @@ import torch.nn as nn
 import torch
 import os
 
-
 class BasicCNN(nn.Module):
     def __init__(self, 
         input_size=(22, 1, 250),
@@ -78,3 +77,9 @@ class BasicCNN(nn.Module):
              "model_state_dict": self.state_dict()
          }
          torch.save(data, path + '/epoch=%03d.pth' % epoch)
+         
+    def load(self, model_path, epoch, optimizer):
+        checkpoint = torch.load(model_path + '/epoch=%03d.pth' % epoch)
+        self.load_state_dict(checkpoint['model_state_dict'])
+        optimizer.load_state_dict(checkpoint['opt_state_dict'])
+        return optimizer, epoch
