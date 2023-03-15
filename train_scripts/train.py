@@ -1,12 +1,14 @@
-from networks.CNN import BasicCNN
-from dataset import EEGDataPreprocessor, EEGDataset
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from utils import to_categorical
 from torch.nn.functional import one_hot
 import datetime
+import os, sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from networks.CNN import BasicCNN
+from dataset import EEGDataPreprocessor, EEGDataset
+from utils import to_categorical
 
 # HYPERPARAMETERS
 num_epochs = 50
