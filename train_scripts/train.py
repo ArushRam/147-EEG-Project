@@ -52,23 +52,14 @@ for epoch in range(num_epochs):
 
     # Loop over the batches in the dataset
     for batch_idx, (data, target) in enumerate(train_loader):
-        # Zero the gradients
         optimizer.zero_grad()
-
-        # Forward pass
         output = model(data)
-
-        # Compute the loss
         loss = loss_fn(output, target.float())
-
-        # Backward pass
         loss.backward()
-
-        # Update the parameters
         optimizer.step()
 
-        # Print the progress
-        if batch_idx % 1000 == 0:
+        # Print progress
+        if batch_idx % 10 == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                 100. * batch_idx / len(train_loader), loss.item()))
