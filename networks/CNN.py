@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch
 import os
-
+from util.functions import Bandpass
 
 class BasicCNN(nn.Module):
     def __init__(self, 
@@ -9,6 +9,9 @@ class BasicCNN(nn.Module):
         num_classes=4, 
         conv_params=None,
         pool_params=None,
+        bandpass=False,
+        device=None,
+        band=(8,30),
         activation=nn.ELU
     ):
         '''
@@ -31,6 +34,9 @@ class BasicCNN(nn.Module):
             raise ValueError('Length of pool_params does not match length of conv_params')
         elif isinstance(pool_params, dict):
             pool_params = [pool_params] * self.n_blocks
+
+        self.do_bandpass = bandpass
+        self.bandpass = Bandpass(band[0], band[1], device)
 
         in_channels = input_size[0]
         dims = input_size[1:]
@@ -63,6 +69,8 @@ class BasicCNN(nn.Module):
         )
 
     def forward(self, x):
+        if self.do_bandpass:
+            x = self.bandpass(x)
         for i in range(self.n_blocks):
             x = self.conv_blocks[i](x)
             # print(f'Block {i} output shape: {x.shape}')

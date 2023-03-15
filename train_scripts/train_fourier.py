@@ -7,6 +7,7 @@ from tqdm import tqdm
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from networks.Fourier_CNN import FourierCNN
+from networks.Fourier_CNN2 import FourierCNN as LinearFourier
 from dataset import EEGDataPreprocessor, EEGDataset
 from util.functions import to_categorical
 
@@ -27,19 +28,19 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size)
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-BasicCNNModel = FourierCNN(sample_freq=250/4, num_bins=250, device=device)
+BasicCNNModel = LinearFourier(sample_freq=250/4, num_bins=250, device=device)
 
 BasicCNNModel.to(device)
 
 
 # Define the loss function and optimizer
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(BasicCNNModel.parameters(), lr=1e-5)
+optimizer = optim.Adam(BasicCNNModel.parameters(), lr=1e-4)
 
 # Train the model
 num_epochs = 50
 
-print(next(BasicCNNModel.parameters()).is_cuda)
+# print(next(BasicCNNModel.parameters()).is_cuda)
 
 for epoch in range(num_epochs):
     # Set the model to training mode
@@ -65,10 +66,10 @@ for epoch in range(num_epochs):
         optimizer.step()
 
         # Print the progress
-        # if batch_idx % 1000 == 0:
-        #     print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-        #         epoch, batch_idx * len(data), len(train_loader.dataset),
-        #         100. * batch_idx / len(train_loader), loss.item()))
+        if batch_idx % 1000 == 0:
+            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                epoch, batch_idx * len(data), len(train_loader.dataset),
+                100. * batch_idx / len(train_loader), loss.item()))
 
     # Evaluate the model on the validation set
     BasicCNNModel.eval()

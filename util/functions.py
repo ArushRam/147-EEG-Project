@@ -5,7 +5,7 @@ import torch
 
 
 class Bandpass(nn.Module):
-    def __init__(self, lower, upper, device=None, num_bins=1000, sample_hz=250) -> None:
+    def __init__(self, lower, upper, device=None, num_bins=250, sample_hz=62.5) -> None:
         super().__init__()
         self.num_bins = num_bins
         self.sample_hz = sample_hz
@@ -31,9 +31,12 @@ class FreqDomain(nn.Module):
             self.mask = self.mask.to(device)
         
     def forward(self, x):
-        f_x = fft.fft(x, dim=-1)
-        f_x = self.mask * f_x
-        return torch.real(fft.ifft(f_x))
+        f_x = fft.fft(x, dim=-1, norm="forward")
+        f_x = f_x[:, :, :, self.mask]
+        r = torch.real(f_x)
+        c = torch.imag(f_x)
+        return torch.concat((r, c), dim=2)
+
 
 
 def data_prep(X,y,sub_sample,average,noise):

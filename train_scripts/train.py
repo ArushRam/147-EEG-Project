@@ -30,6 +30,7 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size)
 
 datetime_str = datetime.datetime.now().strftime("%Y%m%d-%H%M")
 model_save_dir = 'logs/' + datetime_str + '/model'
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 ### MODEL INITIALIZATION ###
 # Define Architecture
@@ -44,7 +45,8 @@ input_size = (22, 1, 250)
 num_classes = 4
 
 # Initialize Model
-model = BasicCNN(input_size, num_classes, conv_params, pool_params)
+model = BasicCNN(input_size, num_classes, conv_params, pool_params, bandpass=True, device=device, band=(0,8))
+model.to(device)
 print(model)
 
 # Define the loss function and optimizer
@@ -58,6 +60,7 @@ for epoch in range(num_epochs):
     train_loss = 0
     # Loop over the batches in the dataset
     for batch_idx, (data, target) in tqdm(enumerate(train_loader)):
+        data, target = data.to(device), target.to(device)
         optimizer.zero_grad()
         output = model(data)
         loss = loss_fn(output, target.float())
@@ -80,6 +83,7 @@ for epoch in range(num_epochs):
 
     with torch.no_grad():
         for data, target in val_loader:
+            data, target = data.to(device), target.to(device)
             output = model(data)
             val_loss += loss_fn(output, target.float()).item()
             pred = output.argmax(dim=1, keepdim=True)
@@ -108,6 +112,7 @@ correct = 0
 
 with torch.no_grad():
     for data, target in test_loader:
+        data, target = data.to(device), target.to(device)
         output = model(data)
         test_loss += loss_fn(output, target.float()).item()
         pred = output.argmax(dim=1, keepdim=True)

@@ -12,16 +12,16 @@ class FourierCNN(nn.Module):
                 # N x 22 x 1 x 250
                 FreqDomain(i, i+4, device, num_bins=num_bins, sample_hz=sample_freq),
                 # N x 22 x 2 x 17
-                nn.Conv2d(in_channels=22, out_channels=25,
-                        kernel_size=(2, 3), padding=(0, 2)).to(device),
-                # N x 25 x 1 x 19
+                nn.Flatten(),
+                nn.Linear(22*2*17, 200),
+                nn.BatchNorm1d(200),
                 nn.ELU(),
-                nn.AvgPool2d(kernel_size=(1, 2), padding=(0, 1)),
-                # N x 25 x 1 x 10
-                nn.BatchNorm2d(25).to(device),
+                nn.Linear(200, 50),
+                nn.BatchNorm1d(50),
+                nn.ELU(),
                 # nn.Dropout2d(p=0.5)
             )
-            for i in range(0, 9)
+            for i in range(8, 28, 2)
         ])
 
         self.spatial_filter = nn.Sequential(
@@ -31,7 +31,7 @@ class FourierCNN(nn.Module):
                         kernel_size=(1, 3), padding=(0, 1)).to(device),
             # N x 50 x 1 x 10
             nn.ELU(),
-            nn.AvgPool2d(kernel_size=(1, 2), padding=(0, 0)),
+            nn.MaxPool2d(kernel_size=(1, 2), padding=(0, 0)),
             # N x 50 x 1 x 5
             nn.BatchNorm2d(50).to(device),
             # nn.Dropout2d(p=0.5)
@@ -39,7 +39,9 @@ class FourierCNN(nn.Module):
 
         self.fc = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(in_features=5 * 50, out_features=100),
+            nn.Linear(in_features=10 * 50, out_features=100),
+            nn.BatchNorm1d(100),
+            nn.ELU(),
             nn.Linear(in_features=100, out_features=4),
             nn.Softmax(dim=1)
         )
@@ -51,7 +53,7 @@ class FourierCNN(nn.Module):
         x = torch.cat(x, dim=1)
         # print(x.shape)
 
-        x = self.spatial_filter(x)
+        # x = self.spatial_filter(x)
         # print("Cat output shape:", x.shape)
         x = self.fc(x)
         # print("FC output shape:", x.shape)
