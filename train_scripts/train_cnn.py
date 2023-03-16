@@ -11,7 +11,7 @@ from util.functions import set_all_seeds
 set_all_seeds(seed=0)
 
 # IMPORT NETWORK
-from networks.ST_CNN import BasicCNN
+from networks.CNN import BasicCNN
 
 # HYPERPARAMETERS
 hyperparameters = {
