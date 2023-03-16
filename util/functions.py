@@ -2,7 +2,7 @@ import numpy as np
 import torch.nn as nn
 import torch.fft as fft
 import torch
-
+import random
 
 class Bandpass(nn.Module):
     def __init__(self, lower, upper, device=None, num_bins=1000, sample_hz=250) -> None:
@@ -79,3 +79,10 @@ def data_prep(X,y,trim_size,sub_sample,average,noise):
 def to_categorical(y, num_classes):
     """ 1-hot encodes a tensor """
     return np.eye(num_classes, dtype='uint8')[y]
+
+def set_all_seeds(seed):
+  random.seed(seed)
+  np.random.seed(seed)
+  torch.manual_seed(seed)
+  torch.cuda.manual_seed(seed)
+  torch.backends.cudnn.deterministic = True

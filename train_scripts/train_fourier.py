@@ -27,7 +27,11 @@ train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=batch_size)
 test_loader = DataLoader(test_dataset, batch_size=batch_size)
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = "cpu"
+if torch.cuda.is_available():
+    device = "cuda:0"
+elif torch.backends.mps.is_available():
+    device = "mps"
 
 BasicCNNModel = FourierCNN(sample_freq=250/4, num_bins=250, device=device)
 
@@ -41,7 +45,7 @@ optimizer = optim.Adam(BasicCNNModel.parameters(), lr=1e-5)
 # Train the model
 num_epochs = 50
 
-print(next(BasicCNNModel.parameters()).is_cuda)
+# print(next(BasicCNNModel.parameters()).is_cuda)
 
 for epoch in range(num_epochs):
     # Set the model to training mode
