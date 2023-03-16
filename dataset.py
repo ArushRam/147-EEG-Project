@@ -83,7 +83,7 @@ class EEGDataPreprocessor:
         # Preprocessing the dataset
             x_train, y_train = data_prep(x_train, y_train, self.trim_size, self.sub_sample, self.average, self.noise)
             x_valid, y_valid = data_prep(x_valid, y_valid, self.trim_size, self.sub_sample, self.average, self.noise)
-            X_test_prep, y_test_prep = data_prep(X_test, self.trim_size, self.sub_sample, self.average, self.noise)
+            X_test_prep, y_test_prep = data_prep(X_test, y_test, self.trim_size, self.sub_sample, self.average, self.noise)
 
             print('Shape of testing set:', X_test_prep.shape)
             print('Shape of testing labels:', y_test_prep.shape)

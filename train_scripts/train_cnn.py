@@ -11,7 +11,7 @@ from util.functions import set_all_seeds
 set_all_seeds(seed=0)
 
 # IMPORT NETWORK
-from networks.CNN import BasicCNN
+from networks.ST_CNN import BasicCNN
 
 # HYPERPARAMETERS
 hyperparameters = {
@@ -21,6 +21,11 @@ hyperparameters = {
     'learning_rate': 0.0001,
     'weight_decay': 0.001,
     'batch_size': 128,
+}
+
+preprocess_params = {
+#   'valid_ratio': 0.2,
+    'trim_size': 250,
 }
 
 ### MODEL INITIALIZATION ###
@@ -41,9 +46,9 @@ model = BasicCNN
 
 def run():
     # Initialize Model
-    model_instance = model(*params)
+    model_instance = model(*params).float()
     # Get Loaders
-    loaders = get_loaders(batch_size=hyperparameters['batch_size'])
+    loaders = get_loaders(batch_size=hyperparameters['batch_size'], preprocess_params=preprocess_params)
     # Initialize Trainer
     trainer = Trainer(loaders, model_instance, hyperparameters)
     # Train Model
