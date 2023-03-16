@@ -1,4 +1,5 @@
 data
 logs
-test_tf.py
-runs
+__pycache__
+networks/__pycache__
+util/__pycache__

@@ -24,6 +24,16 @@ processed_data = EEGDataPreprocessor()
 train_dataset = EEGDataset(np.swapaxes(processed_data.x_train, 1, 2), processed_data.y_train)
 val_dataset = EEGDataset(np.swapaxes(processed_data.x_valid, 1, 2), processed_data.y_valid)
 test_dataset = EEGDataset(np.swapaxes(processed_data.x_test, 1, 2), processed_data.y_test)
+num_epochs = 200
+batch_size = 64
+trim_size = 500
+learning_rate = 0.0001
+writer = SummaryWriter()
+
+processed_data = EEGDataPreprocessor(hyperparams={'trim_size': trim_size})
+train_dataset = EEGDataset(processed_data.x_train, processed_data.y_train)
+val_dataset = EEGDataset(processed_data.x_valid, processed_data.y_valid)
+test_dataset = EEGDataset(processed_data.x_test, processed_data.y_test)
 
 # Create dataloaders for training, validation, and testing data
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)

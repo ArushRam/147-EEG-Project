@@ -19,10 +19,19 @@ class EEGDataset(TensorDataset):
 
 
 class EEGDataPreprocessor:
-    def __init__(self, valid_ratio=0.2, preprocess=True) -> None:
+    def __init__(self, valid_ratio=0.2, preprocess=True, hyperparams=None) -> None:
         self.valid_ratio = valid_ratio
         self.data = self.load()
         self.do_preprocess = preprocess
+
+        # hyperparameters
+        if not hyperparams:
+            hyperparams = {}
+        self.trim_size = hyperparams.get('trim_size', 500)
+        self.sub_sample = hyperparams.get('sub_sample', 2)
+        self.average = hyperparams.get('average', 2)
+        self.noise = hyperparams.get('noise', True)
+
         (self.x_train,
          self.y_train,
          self.x_valid,
@@ -72,9 +81,9 @@ class EEGDataPreprocessor:
 
         if self.do_preprocess:
         # Preprocessing the dataset
-            x_train, y_train = data_prep(x_train, y_train, 2, 2, True)
-            x_valid, y_valid = data_prep(x_valid, y_valid, 2, 2, True)
-            X_test_prep, y_test_prep = data_prep(X_test, y_test, 2, 2, True)
+            x_train, y_train = data_prep(x_train, y_train, self.trim_size, self.sub_sample, self.average, self.noise)
+            x_valid, y_valid = data_prep(x_valid, y_valid, self.trim_size, self.sub_sample, self.average, self.noise)
+            X_test_prep, y_test_prep = data_prep(X_test, self.trim_size, self.sub_sample, self.average, self.noise)
 
             print('Shape of testing set:', X_test_prep.shape)
             print('Shape of testing labels:', y_test_prep.shape)
