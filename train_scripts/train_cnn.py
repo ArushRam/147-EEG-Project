@@ -25,7 +25,7 @@ hyperparameters = {
 
 preprocess_params = {
 #   'valid_ratio': 0.2,
-    'trim_size': 250,
+    'trim_size': 500,
 }
 
 ### MODEL INITIALIZATION ###
@@ -49,6 +49,7 @@ def run():
     model_instance = model(*params).float()
     # Get Loaders
     loaders = get_loaders(batch_size=hyperparameters['batch_size'], preprocess_params=preprocess_params)
+    print(loaders)
     # Initialize Trainer
     trainer = Trainer(loaders, model_instance, hyperparameters)
     # Train Model
