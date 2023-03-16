@@ -3,7 +3,6 @@ from torch.utils.data import TensorDataset
 import numpy as np
 from util.functions import data_prep, to_categorical
 
-
 class EEGDataset(TensorDataset):
     def __init__(self, x, y) -> None:
         super().__init__()
