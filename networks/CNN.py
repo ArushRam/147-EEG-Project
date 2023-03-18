@@ -52,7 +52,9 @@ class BasicCNN(nn.Module):
             )
             channels = num_filters
             dims = [(dims[j] - kernel_size[j] + 2 * conv_padding[j])//conv_stride[j] + 1 for j in range(2)]
+            print(dims)
             dims = [(dims[j] - pool_size[j] + 2 * pool_padding[j])//pool_stride[j] + 1 for j in range(2)]
+            print(dims)
                      
         self.conv_blocks = nn.ModuleList(conv_blocks)
         self.fc = nn.Sequential(
