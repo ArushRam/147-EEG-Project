@@ -53,7 +53,6 @@ def run():
     loaders = get_loaders(batch_size=hyperparameters['batch_size'], preprocess_params=preprocess_params)
     # Initialize Trainer
     trainer = Trainer(loaders, model_instance, hyperparameters, run_name=run_name)
-    return
     # Train Model
     trainer.train()
     # Evaluate Model

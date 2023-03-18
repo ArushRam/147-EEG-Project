@@ -20,7 +20,7 @@ k = 5
 nfilters = 40
 psize = 7
 pstride = 3
-run_name = f'CNN1-k{k}-f{nfilters}-p{psize}-ps{pstride}(125*6)(0.0001)'
+run_name = f'CNN1-k{k}-f{nfilters}-p{psize}-ps{pstride}(125*4)(0.0001)'
 
 hyperparameters = {
     'loss_fn': nn.CrossEntropyLoss(),
@@ -33,7 +33,7 @@ hyperparameters = {
 
 preprocess_params = {
 #   'valid_ratio': 0.2,
-    'trim_size': 750,
+    'trim_size': 500,
     'maxpool': True,
     'sub_sample': 6,
     'average': 6
