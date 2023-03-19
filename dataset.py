@@ -51,6 +51,8 @@ class EEGDataPreprocessor:
         y_test = np.load("data/y_test.npy")
         X_train_valid = np.load("data/X_train_valid.npy")
         y_train_valid = np.load("data/y_train_valid.npy")
+        person_train_valid = np.load("data/person_train_valid.npy")
+        person_test = np.load("data/person_test.npy")
         y_train_valid -= 769
         y_test -= 769
         return (
@@ -58,13 +60,15 @@ class EEGDataPreprocessor:
             y_test,
             X_train_valid,
             y_train_valid,
+            person_train_valid,
+            person_test
         )
 
     def preprocess(self, data, valid_ratio):
         (X_test,
          y_test,
          X_train_valid,
-         y_train_valid) = data
+         y_train_valid, person_train_valid, person_test) = data
 
         # Random splitting and reshaping the data
         # First generating the training and validation indices using random splitting
@@ -76,12 +80,13 @@ class EEGDataPreprocessor:
         # Creating the training and validation sets using the generated indices
         (x_train, x_valid) = X_train_valid[ind_train], X_train_valid[ind_valid]
         (y_train, y_valid) = y_train_valid[ind_train], y_train_valid[ind_valid]
+        (person_train, person_valid) = person_train_valid[ind_train], person_train_valid[ind_valid]
 
         if self.do_preprocess:
         # Preprocessing the dataset
-            x_train, y_train = data_prep(x_train, y_train, self.params)
-            x_valid, y_valid = data_prep(x_valid, y_valid, self.params)
-            X_test_prep, y_test_prep = data_prep(X_test, y_test, self.params)
+            x_train, y_train = data_prep(x_train, y_train, person_train, self.params)
+            x_valid, y_valid = data_prep(x_valid, y_valid, person_valid, self.params)
+            X_test_prep, y_test_prep = data_prep(X_test, y_test, person_test, self.params)
 
             print('Shape of testing set:', X_test_prep.shape)
             print('Shape of testing labels:', y_test_prep.shape)

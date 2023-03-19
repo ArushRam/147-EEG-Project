@@ -36,7 +36,7 @@ class FreqDomain(nn.Module):
         return torch.real(fft.ifft(f_x))
 
 
-def data_prep(X,y,params):
+def data_prep(X,y,params, mode='train'):
     
     trim_size = params.get('trim_size', 500)
     maxpool = params.get('maxpool', True)
@@ -49,6 +49,10 @@ def data_prep(X,y,params):
     # Trimming the data (sample,22,1000) -> (sample,22,500)
     X = X[:,:,0:trim_size]
     print('Shape of X after trimming:',X.shape)
+
+    if mode == 'train':
+        mean, std = np.mean(X), np.std(X)
+        X = (X - mean)/std
 
     if maxpool:
         # Maxpooling the data (sample,22,1000) -> (sample,22,500/sub_sample)
