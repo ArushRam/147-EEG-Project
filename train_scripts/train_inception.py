@@ -11,21 +11,17 @@ from util.functions import set_all_seeds
 set_all_seeds(seed=0)
 
 # IMPORT NETWORK
-from networks.CNN import BasicCNN
+from networks.inception import Inception1 as model
 
 # HYPERPARAMETERS
 
 # k1, k2 = 15, 5
-k = 5
-nfilters = 40
-psize = 7
-pstride = 3
-run_name = f'CNN1-k{k}-f{nfilters}-p{psize}-ps{pstride}(Pool-BN-ELU-NoBias, 0.001)'
+run_name = f'Inception1-Base'
 
 hyperparameters = {
     'loss_fn': nn.CrossEntropyLoss(),
     'optimizer': optim.Adam,
-    'num_epochs': 500,
+    'num_epochs': 200,
     'learning_rate': 0.001,
     'weight_decay': 0.01,
     'batch_size': 128,
@@ -36,38 +32,39 @@ preprocess_params = {
     'trim_size': 500,
     'maxpool': True,
     'sub_sample': 4,
-    'average': 4
+    'average': 4,
+    'swap_axes': (1, 2)
 }
 
 ### MODEL INITIALIZATION ###
 # Define Architecture
-conv_params = [
-    {'kernel_size': (1, k), 'num_filters': nfilters, 'padding': (0, 1)},
-    # {'kernel_size': (1, 3), 'num_filters': nfilters, 'padding': (0, 3)},
-    # {'kernel_size': (1, 10), 'num_filters': 25, 'padding': (0, 5)},
-    # {'kernel_size': (1, 10), 'num_filters': 25, 'padding': (0, 5)}
-]
-pool_params = [
-    {'pool_fn': nn.AvgPool2d, 'kernel_size': (1, psize), 'padding': (0, 1), 'stride':(1, pstride)},
-    # {'pool_fn': nn.AvgPool2d, 'kernel_size': (1, psize), 'padding': (0, 1), 'stride':(1, pstride)},
-]
-input_size = (22, 1, preprocess_params['trim_size']//preprocess_params['sub_sample'])
+conv_params = {
+    'k1': 1, 'n1': 8,
+    'k2': 3, 'n2': 8,
+    'k3': 5, 'n3': 8,
+    'ns': 8
+}
+pool_params = {
+    'k': 7, 's': 3
+}
+
+input_size = (1, 22, preprocess_params['trim_size']//preprocess_params['sub_sample'])
 num_classes = 4
 activation = nn.ELU
 ## WRITE PARAMS INTO TUPLE SO YOU CAN USE THE MAIN FUNCTION WITHOUT CHANGES
 params = (input_size, num_classes, conv_params, pool_params, activation)
-model = BasicCNN
 
 
 def run():
     # Initialize Model
     model_instance = model(*params).float()
-    print(model_instance)
-    print(sum(p.numel() for p in model_instance.parameters() if p.requires_grad))
     # Get Loaders
     loaders = get_loaders(batch_size=hyperparameters['batch_size'], preprocess_params=preprocess_params)
     # Initialize Trainer
     trainer = Trainer(loaders, model_instance, hyperparameters, run_name=run_name)
+
+    return
+
     # Train Model
     trainer.train()
     # Evaluate Model
