@@ -1,0 +1,11 @@
+Inception1 Base:
+conv_params = {
+    'k1': 1, 'n1': 8,
+    'k2': 3, 'n2': 8,
+    'k3': 5, 'n3': 8,
+    'ns': 8
+}
+pool_params = {
+    'k': 7, 's': 3
+}
+

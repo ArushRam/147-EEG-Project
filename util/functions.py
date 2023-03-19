@@ -36,7 +36,7 @@ class FreqDomain(nn.Module):
         return torch.real(fft.ifft(f_x))
 
 
-def data_prep(X,y,trim_size,sub_sample,average,noise):
+def data_prep(X,y,trim_size,sub_sample,maxpool,average,noise):
     
     total_X = None
     total_y = None
@@ -44,35 +44,41 @@ def data_prep(X,y,trim_size,sub_sample,average,noise):
     # Trimming the data (sample,22,1000) -> (sample,22,500)
     X = X[:,:,0:trim_size]
     print('Shape of X after trimming:',X.shape)
-    
-    # Maxpooling the data (sample,22,1000) -> (sample,22,500/sub_sample)
-    X_max = np.max(X.reshape(X.shape[0], X.shape[1], -1, sub_sample), axis=3)
-    
-    
-    total_X = X_max
-    total_y = y
-    print('Shape of X after maxpooling:',total_X.shape)
-    
-    # Averaging + noise 
-    X_average = np.mean(X.reshape(X.shape[0], X.shape[1], -1, average),axis=3)
-    X_average = X_average + np.random.normal(0.0, 0.5, X_average.shape)
-    
-    total_X = np.vstack((total_X, X_average))
-    total_y = np.hstack((total_y, y))
-    print('Shape of X after averaging+noise and concatenating:',total_X.shape)
+
+    if maxpool:
+        # Maxpooling the data (sample,22,1000) -> (sample,22,500/sub_sample)
+        X_max = np.max(X.reshape(X.shape[0], X.shape[1], -1, sub_sample), axis=3)
+        total_X = X_max
+        total_y = y
+        print('Shape of X after maxpooling:',total_X.shape)
+
+    if average > 1:
+        # Averaging + noise 
+        X_average = np.mean(X.reshape(X.shape[0], X.shape[1], -1, average),axis=3)
+        if noise:
+            X_average = X_average + np.random.normal(0.0, 0.5, X_average.shape)
+        if total_X is None:
+            total_X = X_average
+            total_y = y
+        else:
+            total_X = np.vstack((total_X, X_average))
+            total_y = np.hstack((total_y, y))
+        print('Shape of X after averaging+noise and concatenating:',total_X.shape)
     
     # Subsampling
-    
     for i in range(sub_sample):
         
         X_subsample = X[:, :, i::sub_sample] + \
                             (np.random.normal(0.0, 0.5, X[:, :,i::sub_sample].shape) if noise else 0.0)
-            
-        total_X = np.vstack((total_X, X_subsample))
-        total_y = np.hstack((total_y, y))
-        
-    
-    print('Shape of X after subsampling and concatenating:',total_X.shape)
+        if total_X is None:
+            total_X = X_subsample
+            total_y = y
+        else:
+            total_X = np.vstack((total_X, X_subsample))
+            total_y = np.hstack((total_y, y))
+        print('Shape of X after subsampling and concatenating:',total_X.shape)
+
+    print('Final X Shape: ', total_X.shape)
     return total_X,total_y
 
 
@@ -81,8 +87,8 @@ def to_categorical(y, num_classes):
     return np.eye(num_classes, dtype='uint8')[y]
 
 def set_all_seeds(seed):
-  random.seed(seed)
-  np.random.seed(seed)
-  torch.manual_seed(seed)
-  torch.cuda.manual_seed(seed)
-  torch.backends.cudnn.deterministic = True
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True

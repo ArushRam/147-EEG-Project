@@ -44,15 +44,17 @@ class BasicCNN(nn.Module):
             pool_size, pool_fn = pool_params[i]['kernel_size'], pool_params[i].get('pool_type', nn.MaxPool2d)
             pool_stride, pool_padding = pool_params[i].get('stride', pool_size), pool_params[i].get('padding', (0, 0))
             conv_blocks[i] = nn.Sequential(
-                nn.Conv2d(channels, num_filters, kernel_size, conv_stride, conv_padding),
-                activation(),
+                nn.Conv2d(channels, num_filters, kernel_size, conv_stride, conv_padding, bias=False),
                 pool_fn(pool_size, pool_stride, pool_padding),
+                activation(),
                 nn.BatchNorm2d(num_filters),
                 nn.Dropout2d(p=0.5)
             )
             channels = num_filters
             dims = [(dims[j] - kernel_size[j] + 2 * conv_padding[j])//conv_stride[j] + 1 for j in range(2)]
+            print(dims)
             dims = [(dims[j] - pool_size[j] + 2 * pool_padding[j])//pool_stride[j] + 1 for j in range(2)]
+            print(dims)
                      
         self.conv_blocks = nn.ModuleList(conv_blocks)
         self.fc = nn.Sequential(

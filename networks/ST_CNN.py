@@ -55,5 +55,3 @@ class ShallowCNN(nn.Module):
         self.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['opt_state_dict'])
         return optimizer, epoch
-
-

@@ -48,7 +48,7 @@ class Trainer:
 
         print("Device: ", self.device)
         print("Model: ", model)
-        print("Trainable Parameters: ", print(self.model_param_count))
+        print("Trainable Parameters: ", self.model_param_count)
 
         return
     

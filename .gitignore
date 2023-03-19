@@ -3,3 +3,4 @@ logs
 __pycache__
 networks/__pycache__
 util/__pycache__
+mac_setup.sh
