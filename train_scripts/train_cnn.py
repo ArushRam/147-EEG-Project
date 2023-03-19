@@ -20,12 +20,12 @@ k = 5
 nfilters = 40
 psize = 7
 pstride = 3
-run_name = f'CNN1-k{k}-f{nfilters}-p{psize}-ps{pstride}(Pool-BN-ELU-NoBias, 0.001)'
+run_name = f'old_pipeline'
 
 hyperparameters = {
     'loss_fn': nn.CrossEntropyLoss(),
     'optimizer': optim.Adam,
-    'num_epochs': 500,
+    'num_epochs': 10,
     'learning_rate': 0.001,
     'weight_decay': 0.01,
     'batch_size': 128,
@@ -33,7 +33,7 @@ hyperparameters = {
 
 preprocess_params = {
 #   'valid_ratio': 0.2,
-    'trim_size': 500,
+    'trim_size': 512,
     'maxpool': True,
     'sub_sample': 4,
     'average': 4

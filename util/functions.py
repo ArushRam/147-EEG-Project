@@ -36,8 +36,13 @@ class FreqDomain(nn.Module):
         return torch.real(fft.ifft(f_x))
 
 
-def data_prep(X,y,trim_size,sub_sample,maxpool,average,noise):
+def data_prep(X,y,params):
     
+    trim_size = params.get('trim_size', 500)
+    maxpool = params.get('maxpool', True)
+    sub_sample = params.get('sub_sample', 2)
+    average = params.get('average', 2)
+    noise = params.get('noise', True)
     total_X = None
     total_y = None
     
