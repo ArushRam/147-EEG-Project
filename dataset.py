@@ -4,10 +4,17 @@ import numpy as np
 from util.functions import data_prep, to_categorical
 
 class EEGDataset(TensorDataset):
-    def __init__(self, x, y) -> None:
+    def __init__(self, x, y, crop=100, noise=0.25, mode='train') -> None:
         super().__init__()
+        self.mode = mode
+        self.crop = crop
+        self.noise = noise
+        self.xdim = x.shape[-1]
         self.x = torch.from_numpy(x).float()
         self.y = torch.from_numpy(y).float()
+
+        i = (self.xdim - crop)//2
+        self.cropidx = (i, self.xdim - i)
 
     def __len__(self):
         return self.x.shape[0]
@@ -15,6 +22,13 @@ class EEGDataset(TensorDataset):
     def __getitem__(self, index):
         target = self.y[index]
         data_val = self.x[index]
+        if self.mode == 'train':
+            data_val += torch.normal(0, self.noise, size=(1, self.xdim))
+            idx = np.random.randint(0, self.xdim - self.crop + 1)
+            data_val = data_val[:,:,idx:idx+self.crop]
+        else:
+            # Center Crop Test Data
+            data_val = data_val[:,:,self.cropidx[0]:self.cropidx[1]]
         return data_val, target
 
 
@@ -82,11 +96,14 @@ class EEGDataPreprocessor:
         (y_train, y_valid) = y_train_valid[ind_train], y_train_valid[ind_valid]
         (person_train, person_valid) = person_train_valid[ind_train], person_train_valid[ind_valid]
 
+        self.params['stats'] = (np.mean(x_train), np.std(x_train))
+
         if self.do_preprocess:
         # Preprocessing the dataset
             x_train, y_train = data_prep(x_train, y_train, person_train, self.params)
-            x_valid, y_valid = data_prep(x_valid, y_valid, person_valid, self.params)
-            X_test_prep, y_test_prep = data_prep(X_test, y_test, person_test, self.params)
+            if len(x_valid) > 0:
+                x_valid, y_valid = data_prep(x_valid, y_valid, person_valid, self.params, 'test')
+            X_test_prep, y_test_prep = data_prep(X_test, y_test, person_test, self.params, 'test')
 
             print('Shape of testing set:', X_test_prep.shape)
             print('Shape of testing labels:', y_test_prep.shape)

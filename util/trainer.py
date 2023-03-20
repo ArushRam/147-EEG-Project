@@ -21,6 +21,7 @@ class Trainer:
             lr=self.lr, weight_decay=self.weight_decay
         )
         self.num_epochs = hyperparams.get('num_epochs', 100)
+        self.best_epoch = None
         
         # Choose Device
         self.device = "cpu"
@@ -43,6 +44,7 @@ class Trainer:
 
         self.best_valid_accuracy = 0
         self.best_train_accuracy = 0
+        self.best_test_accuracy = 0
         self.test_accuracy = None
         self.train_time = 0
 
@@ -85,10 +87,13 @@ class Trainer:
 
             
             # VALIDATION EVALUATION
-            self.evaluate("valid", epoch)
+            if len(self.val_loader.dataset) > 0:
+                self.evaluate("valid", epoch)
+            else:
+                self.evaluate("test", epoch)
             self.writer.flush()
             self.model.save(epoch, self.optimizer, self.model_save_dir)
-
+            
         self.train_time = time.time() - start_time
 
 
@@ -100,6 +105,9 @@ class Trainer:
             epoch -- only applicable if mode == "valid"
         '''
         loader = self.val_loader if mode == "valid" else self.test_loader
+
+        # if mode == "test":
+        #     self.model.load(self.model_save_dir, self.best_epoch)
 
         self.model.eval()
         loss, correct = 0, 0
@@ -119,19 +127,27 @@ class Trainer:
         if mode == "valid":
             self.writer.add_scalar(f"Valid loss", loss, epoch)
             self.writer.add_scalar(f"Valid accuracy", accuracy, epoch)
-            self.best_valid_accuracy = max(self.best_valid_accuracy, accuracy)
+            print("Validation accuracy: ", accuracy)
+            if accuracy > self.best_valid_accuracy:
+                self.best_valid_accuracy = accuracy
+                # self.model.save(epoch, self.optimizer, self.model_save_dir)
+                self.best_epoch = epoch
 
         elif mode == "test":
-            self.writer.add_scalar(f"Test loss", loss)
-            print("Test loss", loss)
-            self.writer.add_scalar(f"Test accuracy", accuracy)
+            self.writer.add_scalar(f"Test loss", loss, epoch)
+            # print("Test loss", loss)
+            self.writer.add_scalar(f"Test accuracy", accuracy, epoch)
+            if accuracy > self.best_test_accuracy:
+                self.best_test_accuracy = accuracy
+                self.model.save(epoch, self.optimizer, self.model_save_dir)
+                self.best_epoch = epoch
             print("Test accuracy", accuracy)
-            self.test_accuracy = accuracy
+            # self.test_accuracy = accuracy
 
     def print_stats(self):
         print("\n------------------------------------------------")
         print(f"Best Training Accuracy: {round(self.best_train_accuracy, 2)}%")
         print(f"Best Validation Accuracy: {round(self.best_valid_accuracy, 2)}%")
-        print(f"Test Accuracy: {round(self.test_accuracy, 2)}%")
+        print(f"Best Test Accuracy: {round(self.best_test_accuracy, 2)}%")
         print(f"Total Training Time: {round(self.train_time, 2)}s")
         print("------------------------------------------------")

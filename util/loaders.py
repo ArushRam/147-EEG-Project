@@ -16,14 +16,16 @@ def get_loaders(dataset=EEGDataset, preprocessor=EEGDataPreprocessor, preprocess
     valid_ratio = preprocess_params.get('valid_ratio', 0.2)
     swap_axes = preprocess_params.get('swap_axes', None)
     processed_data = preprocessor(valid_ratio=valid_ratio, hyperparams=preprocess_params)
+    crop = preprocess_params.get('crop', 100)
+    noise = preprocess_params.get('noise', 0.5)
     if swap_axes:
-        train_dataset = dataset(np.swapaxes(processed_data.x_train, *swap_axes), processed_data.y_train)
-        val_dataset = dataset(np.swapaxes(processed_data.x_valid, *swap_axes), processed_data.y_valid)
-        test_dataset = dataset(np.swapaxes(processed_data.x_test, *swap_axes), processed_data.y_test)
+        train_dataset = dataset(np.swapaxes(processed_data.x_train, *swap_axes), processed_data.y_train, crop=crop, nois=noise, mode='train')
+        val_dataset = dataset(np.swapaxes(processed_data.x_valid, *swap_axes), processed_data.y_valid, crop=crop, noise=noise, mode='test')
+        test_dataset = dataset(np.swapaxes(processed_data.x_test, *swap_axes), processed_data.y_test, crop=crop, noise=noise, mode='test')
     else:
-        train_dataset = dataset(processed_data.x_train, processed_data.y_train)
-        val_dataset = dataset(processed_data.x_valid, processed_data.y_valid)
-        test_dataset = dataset(processed_data.x_test, processed_data.y_test)
+        train_dataset = dataset(processed_data.x_train, processed_data.y_train, crop=crop, noise=noise, mode='train')
+        val_dataset = dataset(processed_data.x_valid, processed_data.y_valid, crop=crop, noise=noise, mode='test')
+        test_dataset = dataset(processed_data.x_test, processed_data.y_test, crop=crop, noise=noise, mode='test')
 
     # Create dataloaders for training, validation, and testing data
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
