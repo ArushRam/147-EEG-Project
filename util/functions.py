@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.fft as fft
 import torch
 import random
+from scipy import signal
 
 class Bandpass(nn.Module):
     def __init__(self, lower, upper, device=None, num_bins=1000, sample_hz=250) -> None:
@@ -36,8 +37,17 @@ class FreqDomain(nn.Module):
         return torch.real(fft.ifft(f_x))
 
 
-def data_prep(X,y,trim_size,sub_sample,maxpool,average,noise):
+def data_prep(X , y, person, params, mode='train'):
     
+    trim_size = params.get('trim_size', 500)
+    maxpool = params.get('maxpool', True)
+    sub_sample = params.get('sub_sample', 2)
+    average = params.get('average', True)
+    noise = params.get('noise', True)
+    bp_range = params.get('bp_range', None)
+    mean, std = params.get('stats', None)
+    if mode == 'test':
+        noise = 0
     total_X = None
     total_y = None
     
@@ -45,18 +55,24 @@ def data_prep(X,y,trim_size,sub_sample,maxpool,average,noise):
     X = X[:,:,0:trim_size]
     print('Shape of X after trimming:',X.shape)
 
+    # Z3 based normalization from the paper
+    # mean, std = np.mean(X), np.std(X)
+    # X = (X - mean)/std
+    # mean, std = np.mean(X, axis=2), np.std(X, axis=2)
+    # X = (X - mean[:,:,np.newaxis])/std[:,:,np.newaxis]
+
     if maxpool:
         # Maxpooling the data (sample,22,1000) -> (sample,22,500/sub_sample)
         X_max = np.max(X.reshape(X.shape[0], X.shape[1], -1, sub_sample), axis=3)
         total_X = X_max
         total_y = y
-        print('Shape of X after maxpooling:',total_X.shape)
+    #     print('Shape of X after maxpooling:',total_X.shape)
 
-    if average > 1:
+    if average:
         # Averaging + noise 
-        X_average = np.mean(X.reshape(X.shape[0], X.shape[1], -1, average),axis=3)
+        X_average = np.mean(X.reshape(X.shape[0], X.shape[1], -1, sub_sample),axis=3)
         if noise:
-            X_average = X_average + np.random.normal(0.0, 0.5, X_average.shape)
+            X_average = X_average + np.random.normal(0.0, noise, X_average.shape)
         if total_X is None:
             total_X = X_average
             total_y = y
@@ -68,8 +84,8 @@ def data_prep(X,y,trim_size,sub_sample,maxpool,average,noise):
     # Subsampling
     for i in range(sub_sample):
         
-        X_subsample = X[:, :, i::sub_sample] + \
-                            (np.random.normal(0.0, 0.5, X[:, :,i::sub_sample].shape) if noise else 0.0)
+        X_subsample = X[:, :, i::sub_sample] # + \
+                            # (np.random.normal(0.0, 0.25, X[:, :,i::sub_sample].shape) if noise else 0.0)
         if total_X is None:
             total_X = X_subsample
             total_y = y
@@ -77,6 +93,12 @@ def data_prep(X,y,trim_size,sub_sample,maxpool,average,noise):
             total_X = np.vstack((total_X, X_subsample))
             total_y = np.hstack((total_y, y))
         print('Shape of X after subsampling and concatenating:',total_X.shape)
+
+    # BUTTERWORTH FILTER
+    if bp_range:
+        sos = signal.butter(5, bp_range, 'bp', fs=250/sub_sample, output='sos')
+        total_X = signal.sosfilt(sos, total_X, axis=-1)
+
 
     print('Final X Shape: ', total_X.shape)
     return total_X,total_y
