@@ -1,6 +1,6 @@
 # EEG Classifier
 
-This project built and compared various neural network architectures for classifying electro-encephalogram (EEG). The dataset used was [BCI Competition IV 2a](https://lampz.tugraz.at/~bci/database/001-2014/description.pdf) (Brunner, Clemens, et al.).
+This project built and compared various neural network architectures for classifying electro-encephalogram data (EEG). The dataset used was [BCI Competition IV 2a](https://lampz.tugraz.at/~bci/database/001-2014/description.pdf) (Brunner, Clemens, et al.).
 
 ### Architectures
 
