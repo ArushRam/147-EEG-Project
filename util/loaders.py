@@ -4,7 +4,7 @@ from dataset import EEGDataPreprocessor, EEGDataset
 import numpy as np
 from torch.utils.data import DataLoader
 
-def get_loaders(dataset=EEGDataset, preprocessor=EEGDataPreprocessor, preprocess_params=None, batch_size=128):
+def get_loaders(data_dir, dataset=EEGDataset, preprocessor=EEGDataPreprocessor, preprocess_params=None, batch_size=128):
     '''
     Get training, validation and test loaders.
     Arguments:
@@ -15,7 +15,7 @@ def get_loaders(dataset=EEGDataset, preprocessor=EEGDataPreprocessor, preprocess
     '''
     valid_ratio = preprocess_params.get('valid_ratio', 0.2)
     swap_axes = preprocess_params.get('swap_axes', None)
-    processed_data = preprocessor(valid_ratio=valid_ratio, hyperparams=preprocess_params)
+    processed_data = preprocessor(data_dir, valid_ratio=valid_ratio, hyperparams=preprocess_params)
     crop = preprocess_params.get('crop', 100)
     noise = preprocess_params.get('noise', 0.5)
     if swap_axes:

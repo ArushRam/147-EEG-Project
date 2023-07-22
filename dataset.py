@@ -33,9 +33,9 @@ class EEGDataset(TensorDataset):
 
 
 class EEGDataPreprocessor:
-    def __init__(self, valid_ratio=0.2, preprocess=True, hyperparams=None) -> None:
+    def __init__(self, data_dir, valid_ratio=0.2, preprocess=True, hyperparams=None) -> None:
         self.valid_ratio = valid_ratio
-        self.data = self.load()
+        self.data = self.load(data_dir)
         self.do_preprocess = preprocess
 
         # hyperparameters
@@ -60,13 +60,13 @@ class EEGDataPreprocessor:
             return EEGDataset(self.x_test, self.x_valid)
         raise ValueError("data_type must be one of 'test/train/valid'")
 
-    def load(self):
-        X_test = np.load("data/X_test.npy")
-        y_test = np.load("data/y_test.npy")
-        X_train_valid = np.load("data/X_train_valid.npy")
-        y_train_valid = np.load("data/y_train_valid.npy")
-        person_train_valid = np.load("data/person_train_valid.npy")
-        person_test = np.load("data/person_test.npy")
+    def load(self, data_dir):
+        X_test = np.load(f"{data_dir}/X_test.npy")
+        y_test = np.load(f"{data_dir}/y_test.npy")
+        X_train_valid = np.load(f"{data_dir}/X_train_valid.npy")
+        y_train_valid = np.load(f"{data_dir}/y_train_valid.npy")
+        person_train_valid = np.load(f"{data_dir}/person_train_valid.npy")
+        person_test = np.load(f"{data_dir}/person_test.npy")
         y_train_valid -= 769
         y_test -= 769
         return (
