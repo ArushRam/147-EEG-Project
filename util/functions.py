@@ -114,9 +114,11 @@ def noise_mixing_augmentation(X, y, persons, noise_threshold=100):
     new_Xs, new_ys, new_persons_list = [], [], []
     for label in unique_labels:
         for person in unique_persons:
-            idx = np.logical_and(y == label, persons == person)
+            idx = np.logical_and(y == label)
             print(idx.shape)
             print(X[:, idx].shape)
+
+            raise Exception
 
             # Extract noise for each X in this class
             sos_noise = signal.butter(8, noise_threshold, btype='highpass', output='sos', fs=250)
