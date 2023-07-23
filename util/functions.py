@@ -41,7 +41,7 @@ def data_prep(X , y, person, params, mode='train'):
     
     trim_size = params.get('trim_size', 500)
     maxpool = params.get('maxpool', True)
-    sub_sample = params.get('sub_sample', 2)
+    sub_sample = params.get('sub_sample', 1)
     average = params.get('average', True)
     noise = params.get('noise', True)
     bp_range = params.get('bp_range', None)
@@ -61,25 +61,25 @@ def data_prep(X , y, person, params, mode='train'):
     # mean, std = np.mean(X, axis=2), np.std(X, axis=2)
     # X = (X - mean[:,:,np.newaxis])/std[:,:,np.newaxis]
 
-    if maxpool:
-        # Maxpooling the data (sample,22,1000) -> (sample,22,500/sub_sample)
-        X_max = np.max(X.reshape(X.shape[0], X.shape[1], -1, sub_sample), axis=3)
-        total_X = X_max
-        total_y = y
-    #     print('Shape of X after maxpooling:',total_X.shape)
+    # if maxpool:
+    #     # Maxpooling the data (sample,22,1000) -> (sample,22,500/sub_sample)
+    #     X_max = np.max(X.reshape(X.shape[0], X.shape[1], -1, sub_sample), axis=3)
+    #     total_X = X_max
+    #     total_y = y
+    # #     print('Shape of X after maxpooling:',total_X.shape)
 
-    if average:
-        # Averaging + noise 
-        X_average = np.mean(X.reshape(X.shape[0], X.shape[1], -1, sub_sample),axis=3)
-        if noise:
-            X_average = X_average + np.random.normal(0.0, noise, X_average.shape)
-        if total_X is None:
-            total_X = X_average
-            total_y = y
-        else:
-            total_X = np.vstack((total_X, X_average))
-            total_y = np.hstack((total_y, y))
-        print('Shape of X after averaging+noise and concatenating:',total_X.shape)
+    # if average:
+    #     # Averaging + noise 
+    #     X_average = np.mean(X.reshape(X.shape[0], X.shape[1], -1, sub_sample),axis=3)
+    #     if noise:
+    #         X_average = X_average + np.random.normal(0.0, noise, X_average.shape)
+    #     if total_X is None:
+    #         total_X = X_average
+    #         total_y = y
+    #     else:
+    #         total_X = np.vstack((total_X, X_average))
+    #         total_y = np.hstack((total_y, y))
+    #     print('Shape of X after averaging+noise and concatenating:',total_X.shape)
     
     # Subsampling
     for i in range(sub_sample):
