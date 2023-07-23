@@ -81,29 +81,56 @@ def data_prep(X , y, person, params, mode='train'):
     #         total_y = np.hstack((total_y, y))
     #     print('Shape of X after averaging+noise and concatenating:',total_X.shape)
     
-    # Subsampling
-    for i in range(sub_sample):
+    # # Subsampling
+    # for i in range(sub_sample):
         
-        X_subsample = X[:, :, i::sub_sample] # + \
-                            # (np.random.normal(0.0, 0.25, X[:, :,i::sub_sample].shape) if noise else 0.0)
-        if total_X is None:
-            total_X = X_subsample
-            total_y = y
-        else:
-            total_X = np.vstack((total_X, X_subsample))
-            total_y = np.hstack((total_y, y))
-        print('Shape of X after subsampling and concatenating:',total_X.shape)
+    #     X_subsample = X[:, :, i::sub_sample] # + \
+    #                         # (np.random.normal(0.0, 0.25, X[:, :,i::sub_sample].shape) if noise else 0.0)
+    #     if total_X is None:
+    #         total_X = X_subsample
+    #         total_y = y
+    #     else:
+    #         total_X = np.vstack((total_X, X_subsample))
+    #         total_y = np.hstack((total_y, y))
+    #     print('Shape of X after subsampling and concatenating:',total_X.shape)
 
-    # BUTTERWORTH FILTER
-    if bp_range:
-        sos = signal.butter(5, bp_range, 'bp', fs=250/sub_sample, output='sos')
-        total_X = signal.sosfilt(sos, total_X, axis=-1)
+    # # BUTTERWORTH FILTER
+    # if bp_range:
+    #     sos = signal.butter(5, bp_range, 'bp', fs=250/sub_sample, output='sos')
+    #     total_X = signal.sosfilt(sos, total_X, axis=-1)
 
-    print(np.unique(total_y))
+    new_X, new_y, new_persons = noise_mixing_augmentation(X, y, person)
+    return new_X, new_y
 
     # print('Final X Shape: ', total_X.shape)
     return total_X,total_y
 
+def noise_mixing_augmentation(X, y, persons, noise_threshold=100):
+    unique_labels = np.unique(y)
+    unique_persons = np.unique(persons)
+    new_Xs, new_ys, new_persons_list = [], [], []
+    for label in unique_labels:
+        for person in unique_persons:
+            idx = np.logical_and(y == label, persons == person)
+
+            # Extract noise for each X in this class
+            sos_noise = signal.butter(8, noise_threshold, btype='highpass', output='sos', fs=250)
+            noise = signal.sosfilt(sos_noise, X[idx], axis=-1)
+
+            # Signal candidates
+            signal = X[idx] - noise
+
+            N = len(X[idx])
+
+            new_Xs.append(np.stack([signal[i] + noise[j] for i in range(N) for j in range(N)]))
+            new_ys.append(np.full((len(new_Xs[-1])), fill_value=label))
+            new_persons_list.append(np.full((len(new_Xs[-1])), fill_value=person))
+
+    new_X = np.concatenate(new_Xs)
+    new_y = np.concatenate(new_ys)
+    new_persons_list = np.concatenate(new_persons_list)
+
+    return new_X, new_y, new_persons_list
 
 def to_categorical(y, num_classes):
     """ 1-hot encodes a tensor """
