@@ -99,8 +99,9 @@ def data_prep(X , y, person, params, mode='train'):
         sos = signal.butter(5, bp_range, 'bp', fs=250/sub_sample, output='sos')
         total_X = signal.sosfilt(sos, total_X, axis=-1)
 
+    print(np.unique(total_y))
 
-    print('Final X Shape: ', total_X.shape)
+    # print('Final X Shape: ', total_X.shape)
     return total_X,total_y
 
 
