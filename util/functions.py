@@ -117,7 +117,8 @@ def noise_mixing_augmentation(X, y, persons, noise_threshold=100):
         filtered_persons, filtered_X = persons[label_idx], X[label_idx]
         for person in unique_persons:
             idx = filtered_persons == person
-            X_slice = filtered_X[idx]
+            print(idx.shape)
+            X_slice = filtered_X[idx, :]
 
             # Extract noise for each X in this class
             sos_noise = signal.butter(8, noise_threshold, btype='highpass', output='sos', fs=250)
