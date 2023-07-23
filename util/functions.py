@@ -99,11 +99,14 @@ def data_prep(X , y, person, params, mode='train'):
     #     sos = signal.butter(5, bp_range, 'bp', fs=250/sub_sample, output='sos')
     #     total_X = signal.sosfilt(sos, total_X, axis=-1)
 
-    new_X, new_y, new_persons = noise_mixing_augmentation(X, y, person)
-    return new_X, new_y
+    if mode == 'train':
+        new_X, new_y, new_persons = noise_mixing_augmentation(X, y, person)
+        return new_X, new_y
+    
+    return X, y
 
     # print('Final X Shape: ', total_X.shape)
-    return total_X,total_y
+    # return total_X,total_y
 
 def noise_mixing_augmentation(X, y, persons, noise_threshold=100):
     unique_labels = np.unique(y)
