@@ -116,14 +116,16 @@ def noise_mixing_augmentation(X, y, persons, noise_threshold=100):
         for person in unique_persons:
             idx = np.logical_and(y == label, persons == person)
 
+            print(X[:, idx].shape)
+
             # Extract noise for each X in this class
             sos_noise = signal.butter(8, noise_threshold, btype='highpass', output='sos', fs=250)
-            noise = signal.sosfilt(sos_noise, X[idx], axis=-1)
+            noise = signal.sosfilt(sos_noise, X[idx, :], axis=-1)
 
             # Signal candidates
-            signals = X[idx] - noise
+            signals = X[idx, :] - noise
 
-            N = len(X[idx])
+            N = len(X[idx, :])
 
             new_Xs.append(np.stack([signals[i] + noise[j] for i in range(N) for j in range(N)]))
             new_ys.append(np.full((len(new_Xs[-1])), fill_value=label))
