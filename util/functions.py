@@ -121,11 +121,11 @@ def noise_mixing_augmentation(X, y, persons, noise_threshold=100):
             noise = signal.sosfilt(sos_noise, X[idx], axis=-1)
 
             # Signal candidates
-            signal = X[idx] - noise
+            signals = X[idx] - noise
 
             N = len(X[idx])
 
-            new_Xs.append(np.stack([signal[i] + noise[j] for i in range(N) for j in range(N)]))
+            new_Xs.append(np.stack([signals[i] + noise[j] for i in range(N) for j in range(N)]))
             new_ys.append(np.full((len(new_Xs[-1])), fill_value=label))
             new_persons_list.append(np.full((len(new_Xs[-1])), fill_value=person))
 
