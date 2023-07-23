@@ -111,14 +111,14 @@ def data_prep(X , y, person, params, mode='train'):
 def noise_mixing_augmentation(X, y, persons, noise_threshold=100):
     unique_labels = np.unique(y)
     unique_persons = np.unique(persons)
+    print(persons.shape)
     new_Xs, new_ys, new_persons_list = [], [], []
     for label in unique_labels:
         label_idx = y == label
         filtered_persons, filtered_X = persons[label_idx], X[label_idx]
         for person in unique_persons:
             idx = filtered_persons == person
-            print(idx.shape)
-            X_slice = filtered_X[idx, :]
+            X_slice = filtered_X[np.squeeze(idx), :]
 
             # Extract noise for each X in this class
             sos_noise = signal.butter(8, noise_threshold, btype='highpass', output='sos', fs=250)
