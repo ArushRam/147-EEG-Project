@@ -115,7 +115,7 @@ def noise_mixing_augmentation(X, y, persons, noise_threshold=100):
     for label in unique_labels:
         for person in unique_persons:
             idx = np.logical_and(y == label, persons == person)
-
+            print(idx.shape)
             print(X[:, idx].shape)
 
             # Extract noise for each X in this class
